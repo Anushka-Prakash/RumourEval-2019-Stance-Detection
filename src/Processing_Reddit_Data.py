@@ -6,21 +6,12 @@ import os
 import pandas as pd
 import json
 import numpy  as np
+from DataPaths import path_train_key,path_dev_key, path_test_key, training_data_path, test_data_path, reddit_train_data_path,reddit_dev_data_path, reddit_test_data_path
 
-#Specifying the path to access Reddit data
-training_data_path = os.path.abspath('../resources/rumourEval2019/rumoureval-2019-training-data')
-test_data_path     = os.path.abspath('../resources/rumourEval2019/rumoureval-2019-test-data')
-
-reddit_train_data_path  =  training_data_path + '/train-data/Reddit_train_data'
-reddit_dev_data_path    =  training_data_path + '/reddit-dev-data'
-reddit_test_data_path   =  test_data_path     + '/reddit-test-data'
-
-
-#Specifying the path to access Reddit key files which contains Reddit post IDs and their corresponding labels
-train_key_df = pd.read_json('../resources/rumourEval2019/rumoureval-2019-training-data/train-key.json')
-dev_key_df   = pd.read_json('../resources/rumourEval2019/rumoureval-2019-training-data/dev-key.json')
-test_key_df  = pd.read_json('../resources/rumourEval2019/final-eval-key.json')
-
+#Specifying the path to access Twitter key files which contains Twitter post IDs and their corresponding labels
+train_key_df = pd.read_json(path_train_key)
+dev_key_df = pd.read_json(path_dev_key)
+test_key_df = pd.read_json(path_test_key)
 
 #Processing the key file to obtain only Reddit data - Train , Development and Test
 def processRedditKeyDataFrame(key_df, datasetType):
@@ -43,7 +34,6 @@ def processRedditKeyDataFrame(key_df, datasetType):
 reddit_train_key_df = processRedditKeyDataFrame(train_key_df, 'train')
 reddit_dev_key_df   = processRedditKeyDataFrame(dev_key_df, 'dev')
 reddit_test_key_df  = processRedditKeyDataFrame(test_key_df, 'test')
-
 
 '''This function fetches the source post from each tree based conversation thread (consisting of source and replies
 on the source post). Data from each source post is stored in a dictionary containing information about source text, 
@@ -204,40 +194,28 @@ reddit_train_dataset_inre, reddit_train_dataset_src = fetchRedditDataset(reddit_
 reddit_dev_dataset_inre, reddit_dev_dataset_src= fetchRedditDataset(reddit_dev_withKeys_df)
 reddit_test_dataset_inre, reddit_test_dataset_src = fetchRedditDataset(reddit_test_withKeys_df)
 
-
 #Merging the 2 dataframes containig source text and reply text for training, dev and test data
 reddit_train_dataset_src = pd.merge(reddit_train_dataset_inre, reddit_train_dataset_src, how = 'inner', on = "id",)
 reddit_dev_dataset_src = pd.merge(reddit_dev_dataset_inre, reddit_dev_dataset_src, how = 'inner', on = "id",)
 reddit_test_dataset_src = pd.merge(reddit_test_dataset_inre, reddit_test_dataset_src, how = 'inner', on = "id",)
-
 
 #Removing unnecessary columns for reddit training, dev and test data
 reddit_new_train_data_df = reddit_train_dataset_src[['text_x', 'id', 'inre_x', 'source_x' ,'label_x','inreText', 'sourceText' ]].copy()
 reddit_new_dev_data_df = reddit_dev_dataset_src[['text_x', 'id', 'inre_x', 'source_x' ,'label_x','inreText', 'sourceText' ]].copy()
 reddit_new_test_data_df = reddit_test_dataset_src[['text_x', 'id', 'inre_x', 'source_x' ,'label_x','inreText', 'sourceText' ]].copy()
 
-
 '''If the reply is directly to a source post, then the in-reply post and the source post for this reply post will be the same.
 Hence to avoid redundant data, this block replaces the source text with nan values for training data '''
-for i in range(0,len(reddit_new_train_data_df)):
-    if reddit_new_train_data_df['inre_x'][i] == reddit_new_train_data_df['source_x'][i]:
-        reddit_new_train_data_df['sourceText'][i] = np.nan
-
-
-'''If the reply is directly to a source post, then the in-reply post and the source post for this reply post will be the same.
-Hence to avoid redundant data, this block replaces the source text with nan values for development data'''
-for i in range(0,len(reddit_new_dev_data_df)):
-    if reddit_new_dev_data_df['inre_x'][i] == reddit_new_dev_data_df['source_x'][i]:
-        reddit_new_dev_data_df['sourceText'][i] = np.nan
-
-
-'''If the reply is directly to a source post, then the in-reply post and the source post for this reply post will be the same.
-Hence to avoid redundant data, this block replaces the source text with nan values for test data '''
-for i in range(0,len(reddit_new_test_data_df)):
-    if reddit_new_test_data_df['inre_x'][i] == reddit_new_test_data_df['source_x'][i]:
-        reddit_new_test_data_df['sourceText'][i] = np.nan
-
-
+def removeRedundantData(reddit_df):
+    for i in range(0,len(reddit_df)):
+        if reddit_df['inre_x'][i] == reddit_df['source_x'][i]:
+            reddit_df['sourceText'][i] = np.nan
+    return reddit_df
+        
+reddit_new_train_data_df = removeRedundantData(reddit_new_train_data_df)
+reddit_new_dev_data_df   = removeRedundantData(reddit_new_dev_data_df)
+reddit_new_test_data_df  = removeRedundantData(reddit_new_test_data_df)
+    
 '''Saving the final train, development and test data frames for Reddit data into CSVs. The data from these CSV files are further
 used in the NLP models'''
 reddit_new_train_data_df.to_csv('RedditTrainDataSrc.csv', encoding='utf-8', index=False)

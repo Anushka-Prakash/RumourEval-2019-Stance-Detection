@@ -6,18 +6,12 @@ import os
 import pandas as pd
 import json
 import numpy as np
-
-#Specifying the path to access Twitter data
-training_data_path = os.path.abspath('../resources/rumourEval2019/rumoureval-2019-training-data')
-test_data_path     = os.path.abspath('../resources/rumourEval2019/rumoureval-2019-test-data')
-
-twitter_trainingDev_data_path = training_data_path + '/train-data/Twitter_data'
-twitter_test_data_path        = test_data_path + '/twitter-test-data'
+from DataPaths import path_train_key,path_dev_key, path_test_key, training_data_path, test_data_path, twitter_trainingDev_data_path, twitter_test_data_path
 
 #Specifying the path to access Twitter key files which contains Twitter post IDs and their corresponding labels
-train_key_df = pd.read_json('../resources/rumourEval2019/rumoureval-2019-training-data/train-key.json')
-dev_key_df   = pd.read_json('../resources/rumourEval2019/rumoureval-2019-training-data/dev-key.json')
-test_key_df  = pd.read_json('../resources/rumourEval2019/final-eval-key.json')
+train_key_df = pd.read_json(path_train_key)
+dev_key_df = pd.read_json(path_dev_key)
+test_key_df = pd.read_json(path_test_key)
 
 #Processing the key file to obtain only Twitter data - Train , Development and Test
 def processTwitterKeyDataFrame(key_df, datasetType):
@@ -190,25 +184,17 @@ twitter_new_train_data_df = twitter_train_dataset_src[['text_x', 'id', 'inre_x',
 twitter_new_dev_data_df = twitter_dev_dataset_src[['text_x', 'id', 'inre_x', 'source_x' ,'label_x','inreText', 'sourceText' ]].copy()
 twitter_new_test_data_df = twitter_test_dataset_src[['text_x', 'id', 'inre_x', 'source_x' ,'label_x','inreText', 'sourceText' ]].copy()
 
-
 '''If the reply is directly to a source post, then the in-reply post and the source post for this reply post will be the same.
 Hence to avoid redundant data, this block replaces the source text with nan values for training data '''
-for i in range(0,len(twitter_new_train_data_df)):
-    if twitter_new_train_data_df['inre_x'][i] == twitter_new_train_data_df['source_x'][i]:
-        twitter_new_train_data_df['sourceText'][i] = np.nan
+def removeRedundantData(twitter_df):
+    for i in range(0,len(twitter_df)):
+        if twitter_df['inre_x'][i] == twitter_df['source_x'][i]:
+            twitter_df['sourceText'][i] = np.nan
+    return twitter_df
 
-'''If the reply is directly to a source post, then the in-reply post and the source post for this reply post will be the same.
-Hence to avoid redundant data, this block replaces the source text with nan values for development data '''
-for i in range(0,len(twitter_new_dev_data_df)):
-    if twitter_new_dev_data_df['inre_x'][i] == twitter_new_dev_data_df['source_x'][i]:
-        twitter_new_dev_data_df['sourceText'][i] = np.nan
-
-'''If the reply is directly to a source post, then the in-reply post and the source post for this reply post will be the same.
-Hence to avoid redundant data, this block replaces the source text with nan values for test data '''
-for i in range(0, len(twitter_new_test_data_df)):
-    if twitter_new_test_data_df['inre_x'][i] == twitter_new_test_data_df['source_x'][i]:
-        twitter_new_test_data_df['sourceText'][i] = np.nan
-
+twitter_new_train_data_df = removeRedundantData(twitter_new_train_data_df)
+twitter_new_dev_data_df   = removeRedundantData(twitter_new_dev_data_df)
+twitter_new_test_data_df  = removeRedundantData(twitter_new_test_data_df)
 
 '''Saving the final train, development and test data frames for Reddit data into CSVs. The data from these CSV files are further
 used in the NLP models'''
