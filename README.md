@@ -24,7 +24,8 @@ Both the trained MLP model and the model using our proposed architecture can be 
 
 If you make use of this work, please cite:
 
-```@misc{prakash2020incorporating,  
+```
+@misc{prakash2020incorporating,  
 title={Incorporating Count-Based Features into Pre-Trained Models for Improved Stance Detection},  
 author={Anushka Prakash and Harish Tayyar Madabushi},  
 year={2020},  
