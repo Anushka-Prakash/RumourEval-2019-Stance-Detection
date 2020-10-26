@@ -20,3 +20,15 @@ In addition to the pre-processing code in this repository, we also make availabl
 
 Both the trained MLP model and the model using our proposed architecture can be downloaded from [here](https://drive.google.com/drive/u/0/folders/17KfaFLjQWRYJucO_JqVQWj_o31QsO26K). The predictions from the proposed model can also be found at the same link. 
 
+# Citation
+
+If you make use of this work, please cite:
+
+> @misc{prakash2020incorporating,  
+title={Incorporating Count-Based Features into Pre-Trained Models for Improved Stance Detection},  
+author={Anushka Prakash and Harish Tayyar Madabushi},  
+year={2020},  
+eprint={2010.09078},  
+archivePrefix={arXiv},  
+primaryClass={cs.CL}  
+}
