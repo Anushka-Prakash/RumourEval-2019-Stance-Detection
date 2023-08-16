@@ -16,10 +16,6 @@ In addition to the pre-processing code in this repository, we also make availabl
 - All the experiemnts with RoBERTa model, including our proposed architecture can be found  [here](https://colab.research.google.com/drive/1eB8EMCwEE1_o5QOdC0gEejxqgkv6Q_cO?usp=sharing). 
 
 
-# Trained Models
-
-Both the trained MLP model and the model using our proposed architecture can be downloaded from [here](https://drive.google.com/drive/u/0/folders/17KfaFLjQWRYJucO_JqVQWj_o31QsO26K). The predictions from the proposed model can also be found at the same link. 
-
 # Citation
 
 If you make use of this work, please cite:
